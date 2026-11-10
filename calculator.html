@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GreenExpress Pricing Calculator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101510;color:#f4f7f1;font-family:Arial,sans-serif}
+main{max-width:650px;margin:auto;padding:20px}
+h1{color:#b9ed58;margin-bottom:5px}
+p,small{color:#b5c1b1}
+.card{background:#1d261c;border:1px solid #354531;border-radius:16px;padding:18px;margin:16px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:15px 0}
+input[type=number]{width:78px}
+input,select{padding:10px;border-radius:8px;border:1px solid #71826d;background:#fff;color:#111;font-size:16px}
+select{max-width:65%}
+button{padding:13px;border-radius:10px;border:1px solid #7d9671;background:#283a24;color:white;font-size:15px;flex:1}
+button.active{background:#b9ed58;color:#15200e;font-weight:bold}
+.buttons{display:flex;gap:10px}
+.total{font-size:36px;font-weight:bold;color:#b9ed58}
+.line{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #344431}
+.note{font-size:12px;line-height:1.5}
+</style>
+</head>
+<body>
+<main>
+<h1>GREENEXPRESS</h1>
+<p>Interactive Pricing Calculator · USD</p>
+
+<div class="card">
+<h3>1. Choose your plan</h3>
+<div class="buttons">
+<button id="free" class="active" onclick="plan='free';calculate()">Free · $0/mo</button>
+<button id="one" onclick="plan='one';calculate()">ONE · $19.99/mo</button>
+</div>
+</div>
+
+<div class="card">
+<h3>2. Packages</h3>
+<div class="row"><label>Small packages</label><input id="small" type="number" min="0" value="1"></div>
+<div class="row"><label>Medium packages</label><input id="medium" type="number" min="0" value="2"></div>
+<div class="row"><label>Large packages</label><input id="large" type="number" min="0" value="0"></div>
+<small>Test receiving fees: Small $12, Medium $20, Large $35. ONE receives a 20% discount.</small>
+</div>
+
+<div class="card">
+<h3>3. Storage</h3>
+<div class="row"><label>Storage days</label><input id="days" type="number" min="0" value="7"></div>
+<small>Test assumption: 3 free days for Free, 10 free days for ONE. Additional days: $2 per package per day.</small>
+</div>
+
+<div class="card">
+<h3>4. Optional services</h3>
+<div class="row"><label>Package inspection · $8 each</label><input id="inspection" type="number" min="0" value="0"></div>
+<div class="row"><label>Repacking · $12 each</label><input id="repack" type="number" min="0" value="0"></div>
+<div class="row"><label>Assisted returns · $15 each</label><input id="returns" type="number" min="0" value="0"></div>
+<div class="row"><label>Consolidate shipment · $15</label><input id="consolidate" type="checkbox"></div>
+</div>
+
+<div class="card">
+<h3>5. Delivery or pickup</h3>
+<div class="row">
+<label>Choose method</label>
+<select id="delivery">
+<option value="0">Warehouse pickup · $0</option>
+<option value="15">Local pickup coordination · $15</option>
+<option value="25">Miami local delivery · $25</option>
+<option value="45">Hotel delivery · $45</option>
+<option value="65">Extended-area delivery · $65</option>
+</select>
+</div>
+</div>
+
+<div class="card">
+<h3>Your estimated total</h3>
+<div id="breakdown"></div>
+<div class="row"><strong>Total</strong><span class="total" id="total">$0.00</span></div>
+<p class="note">ONE membership is shown as one monthly fee. The estimate assumes one batch of packages and one delivery. Taxes, insurance, shipping and other charges are excluded. This is a demonstration, not a binding quote.</p>
+</div>
+</main>
+
+<script>
+let plan='free';
+const money=n=>'$'+n.toFixed(2);
+const num=id=>Math.max(0,Number(document.getElementById(id).value)||0);
+function calculate(){
+document.getElementById('free').classList.toggle('active',plan==='free');
+document.getElementById('one').classList.toggle('active',plan==='one');
+const s=num('small'),m=num('medium'),l=num('large');
+const count=s+m+l;
+const membership=plan==='one'?19.99:0;
+const receiving=(s*12+m*20+l*35)*(plan==='one'?.8:1);
+const storage=Math.max(0,num('days')-(plan==='one'?10:3))*count*2;
+const inspection=num('inspection')*8;
+const repack=num('repack')*12;
+const returns=num('returns')*15;
+const consolidation=document.getElementById('consolidate').checked?15:0;
+const delivery=Number(document.getElementById('delivery').value);
+const lines=[
+['Membership',membership],
+['Package receiving',receiving],
+['Storage',storage],
+['Inspections',inspection],
+['Repacking',repack],
+['Returns',returns],
+['Consolidation',consolidation],
+['Delivery / pickup',delivery]
+];
+document.getElementById('breakdown').innerHTML=lines.map(([name,value])=>'<div class="line"><span>'+name+'</span><strong>'+money(value)+'</strong></div>').join('');
+document.getElementById('total').textContent=money(lines.reduce((sum,line)=>sum+line[1],0));
+}
+document.querySelectorAll('input,select').forEach(el=>{
+el.addEventListener('input',calculate);
+el.addEventListener('change',calculate);
+});
+calculate();
+</script>
+</body>
+</html>
+
